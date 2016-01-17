@@ -251,10 +251,9 @@ echo $version
 echo
 echo http://fpdownload.adobe.com/get/flashplayer/pdc/$version/$filename
 echo
-fi
 
 #create unique filename for google upload
-newfilename=$(echo $filename | sed "s/\.exe/_$version\.exe/")
+newfilename=$(echo $filename | sed "s/\.exe/_`echo $version`\.exe/")
 mv $tmp/$filename $tmp/$newfilename
 
 #if google drive config exists then upload and delete file:
@@ -262,6 +261,8 @@ if [ -f "../gd/$appname.cfg" ]
 then
 echo Uploading $filename to Google Drive..
 ../uploader.py "../gd/$appname.cfg" "$tmp/$newfilename"
+fi
+
 fi
 
 } done
