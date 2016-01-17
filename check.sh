@@ -22,7 +22,7 @@ if [ $deep -lt 4 ]; then
   return
 fi
 
-#check if global check-all is installed
+#check if global check-all.sh is installed
 if [ ! -f "../check-all.sh" ]; then
   echo installing check-all.sh
 cat > ../check-all.sh <<EOF
