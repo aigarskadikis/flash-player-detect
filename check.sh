@@ -249,7 +249,8 @@ sed "s/\d034/\n/g" | \
 grep "^[0-9]*.\.[0-9]*.\.[0-9]*.\.[0-9]")
 echo $version
 echo
-echo http://fpdownload.adobe.com/get/flashplayer/pdc/$version/$filename
+realurl=$(echo http://fpdownload.adobe.com/get/flashplayer/pdc/$version/$filename)
+echo $realurl
 echo
 
 #create unique filename for google upload
@@ -264,6 +265,16 @@ echo Make sure you have created \"$appname\" direcotry inside it!
 ../uploader.py "../gd/$appname.cfg" "$tmp/$newfilename"
 echo
 fi
+
+							#lets send emails to all people in "posting" file
+							emails=$(cat ../posting | sed '$aend of file')
+							printf %s "$emails" | while IFS= read -r onemail
+							do {
+								python ../send-email.py "$onemail" "$filename $version" "$realurl
+$md5
+$sha1"
+							} done
+							echo
 
 fi
 
