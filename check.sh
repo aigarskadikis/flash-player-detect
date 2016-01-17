@@ -200,11 +200,16 @@ if [ ! -f "/home/pi/client_secrets.json" ]
 		fi
 fi
 
-#create a new array [linklist] and set the first element. set new line character at the end
-linklist=$'http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player_ax.exe\n'
 
-#append another value to array [linklist]. set new line character at the end
-linklist+=$'http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player.exe\n'
+
+#create a new array [linklist] with two internet links inside and one extra line
+linklist=$(cat <<EOF
+http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player_ax.exe
+http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player.exe
+extra line
+EOF
+)
+
 
 printf %s "$linklist" | while IFS= read -r url
 do {
