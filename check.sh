@@ -191,7 +191,7 @@ if [ ! -f "/home/pi/client_secrets.json" ]
 								echo ../uploader.py ../uploader.cfg ../html-downloader.py
 								return
 							else
-								sed "s/folder = motion/folder = $appname/" ../uploader.cfg > ../gd/$appname.cfg
+								sed "s/folder = test/folder = `echo $appname`/" ../uploader.cfg > ../gd/$appname.cfg
 								echo Every config file looks fine. Upload to Google Drive will be used.
 								echo Make sure folder \"$appname\" is created in your Google Drive!
 								echo
@@ -259,7 +259,8 @@ mv $tmp/$filename $tmp/$newfilename
 #if google drive config exists then upload and delete file:
 if [ -f "../gd/$appname.cfg" ]
 then
-echo Uploading $filename to Google Drive..
+echo Uploading $newfilename to Google Drive..
+echo Make sure you have created \"$appname\" direcotry inside it!
 ../uploader.py "../gd/$appname.cfg" "$tmp/$newfilename"
 fi
 
