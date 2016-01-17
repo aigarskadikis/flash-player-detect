@@ -36,6 +36,7 @@ cd \$workdir
 cd ..
 } done
 EOF
+chmod +x ../check-all.sh
 echo
 fi
 
