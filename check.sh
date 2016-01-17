@@ -262,6 +262,7 @@ then
 echo Uploading $newfilename to Google Drive..
 echo Make sure you have created \"$appname\" direcotry inside it!
 ../uploader.py "../gd/$appname.cfg" "$tmp/$newfilename"
+echo
 fi
 
 fi
