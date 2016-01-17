@@ -200,13 +200,20 @@ if [ ! -f "/home/pi/client_secrets.json" ]
 		fi
 fi
 
+#create a new array [linklist] and set the first element. set new line character at the end
+linklist=$'http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player_ax.exe\n'
 
-url=$(echo http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player_ax.exe)
+#append another value to array [linklist]. set new line character at the end
+linklist+=$'http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player.exe\n'
+
+printf %s "$linklist" | while IFS= read -r url
+do {
 echo url is $url
 filename=$(echo $url | sed "s/^.*\///g")
 echo filename is $filename
+echo downloading file..
 wget $url -O $tmp/$filename -q
-sha1=$(sha1sum $tmp/$filename -q | sed "s/\s.*//g")
+sha1=$(sha1sum $tmp/$filename | sed "s/\s.*//g")
 echo sha1 is $sha1
 grep "$sha1" $db
 if [ $? -ne 0 ]
@@ -232,6 +239,7 @@ sed "s/\d034/\n/g" | \
 grep "^[0-9]*.\.[0-9]*.\.[0-9]*.\.[0-9]")
 echo $versionax
 fi
+} done
 
 #clean and remove whole temp direcotry
 rm $tmp -rf > /dev/null
