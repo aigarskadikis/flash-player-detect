@@ -6,7 +6,7 @@
 #sudo apt-get update -y && sudo apt-get upgrade -y
 #sudo apt-get install git -y
 #mkdir -p /home/pi/detect && cd /home/pi/detect
-#git clone https://github.com/catonrug/jre-detect.git && cd jre-detect && chmod +x check.sh && clear && ./check.sh
+#git clone https://github.com/catonrug/flash-player-detect.git && cd flash-player-detect && chmod +x check.sh && ./check.sh
 
 #check if script is located in /home direcotry
 pwd | grep "^/home/" > /dev/null
@@ -202,7 +202,7 @@ fi
 
 
 
-#create a new array [linklist] with two internet links inside and one extra line
+#create a new array [linklist] with two internet links inside and add one extra line
 linklist=$(cat <<EOF
 http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player_ax.exe
 http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player.exe
@@ -213,37 +213,42 @@ EOF
 
 printf %s "$linklist" | while IFS= read -r url
 do {
-echo url is $url
 filename=$(echo $url | sed "s/^.*\///g")
-echo filename is $filename
-echo downloading file..
+
+echo downloading file $url
 wget $url -O $tmp/$filename -q
+
+echo creating sha1 checksum of file..
 sha1=$(sha1sum $tmp/$filename | sed "s/\s.*//g")
-echo sha1 is $sha1
-grep "$sha1" $db
+
+#check if this file is already in database
+grep "$sha1" $db > /dev/null
 if [ $? -ne 0 ]
 #if sha1 sum do not exist in database then this is new version
 then
-echo New Flash Player AX version detected
+echo new version detected!
 
-#creating md5 checksumsome check sums
+echo creating md5 checksum of file..
 md5=$(md5sum $tmp/$filename | sed "s/\s.*//g")
-echo md5 is $md5
 
 #lets put all signs about this file into the database
 echo "$md5">> $db
 echo "$sha1">> $db
 			
-#check what exact version this is
-7z x $tmp/$filename -y -o$tmp
-versionax=$(cat $tmp/.rsrc/MANIFEST/1 | \
+echo searching exact version number
+7z x $tmp/$filename -y -o$tmp > /dev/null
+version=$(cat $tmp/.rsrc/MANIFEST/1 | \
 sed "s/<dependency>/\n<dependency>\n/g" | \
 sed "s/<\/assembly>/\n<\/assembly>\n/g" | \
 sed "/<dependency>/,/<\/assembly>/d" | \
 sed "s/\d034/\n/g" | \
 grep "^[0-9]*.\.[0-9]*.\.[0-9]*.\.[0-9]")
-echo $versionax
+echo $version
+echo
+echo http://fpdownload.adobe.com/get/flashplayer/pdc/$version/$filename
+echo
 fi
+
 } done
 
 #clean and remove whole temp direcotry
