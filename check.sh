@@ -215,11 +215,13 @@ printf %s "$linklist" | while IFS= read -r url
 do {
 filename=$(echo $url | sed "s/^.*\///g")
 
-echo downloading file $url
+echo Downloading $url
 wget $url -O $tmp/$filename -q
+echo
 
 echo creating sha1 checksum of file..
 sha1=$(sha1sum $tmp/$filename | sed "s/\s.*//g")
+echo
 
 #check if this file is already in database
 grep "$sha1" $db > /dev/null
@@ -227,9 +229,11 @@ if [ $? -ne 0 ]
 #if sha1 sum do not exist in database then this is new version
 then
 echo new version detected!
+echo
 
 echo creating md5 checksum of file..
 md5=$(md5sum $tmp/$filename | sed "s/\s.*//g")
+echo
 
 #lets put all signs about this file into the database
 echo "$md5">> $db
@@ -247,6 +251,17 @@ echo $version
 echo
 echo http://fpdownload.adobe.com/get/flashplayer/pdc/$version/$filename
 echo
+fi
+
+#create unique filename for google upload
+newfilename=$(echo $filename | sed "s/\.exe/_$version\.exe/")
+mv $tmp/$filename $tmp/$newfilename
+
+#if google drive config exists then upload and delete file:
+if [ -f "../gd/$appname.cfg" ]
+then
+echo Uploading $filename to Google Drive..
+../uploader.py "../gd/$appname.cfg" "$tmp/$newfilename"
 fi
 
 } done
