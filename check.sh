@@ -25,7 +25,7 @@ fi
 #check if global check-all is installed
 if [ ! -f "../check-all.sh" ]; then
   echo installing check-all.sh
-cat <<EOF
+cat > ../check-all.sh <<EOF
 #!/bin/sh
 todo=\$(ls -1 */check.sh | sed '\$aend of file')
 printf %s "\$todo" | while IFS= read -r job
