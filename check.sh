@@ -232,7 +232,28 @@ EOF
 
 printf %s "$linklist" | while IFS= read -r url
 do {
+
+wget -S --spider -o $tmp/output.log $url
+
+grep -A99 "^Resolving" $tmp/output.log | grep "HTTP.*200 OK"
+if [ $? -eq 0 ]; then
+#if file request retrieve http code 200 this means OK
+
+grep -A99 "^Resolving" $tmp/output.log | grep "Content-Length" 
+if [ $? -eq 0 ]; then
+#if there is such thing as Content-Length
+
+grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" 
+if [ $? -eq 0 ]; then
+#if there is such thing as Content-Length
+
+#cut out last modified
+lastmodified=$(grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" | sed "s/^.*: //")
+
 filename=$(echo $url | sed "s/^.*\///g")
+
+grep "$filename $lastmodified" $db > /dev/null
+if [ $? -ne 0 ]; then
 
 echo Downloading $url
 wget $url -O $tmp/$filename -q
@@ -243,10 +264,8 @@ sha1=$(sha1sum $tmp/$filename | sed "s/\s.*//g")
 echo
 
 #check if this file is already in database
-grep "$sha1" $db > /dev/null
-if [ $? -ne 0 ]
-#if sha1 sum do not exist in database then this is new version
-then
+
+
 echo new version detected!
 echo
 
@@ -255,9 +274,11 @@ md5=$(md5sum $tmp/$filename | sed "s/\s.*//g")
 echo
 
 #lets put all signs about this file into the database
+echo "$filename $lastmodified">> $db
 echo "$md5">> $db
 echo "$sha1">> $db
-			
+echo >> $db
+
 echo searching exact version number
 7z x $tmp/$filename -y -o$tmp > /dev/null
 version=$(cat $tmp/.rsrc/MANIFEST/1 | \
@@ -294,7 +315,48 @@ $md5
 $sha1"
 							} done
 							echo
+else
+#if file already in database
+echo file already in database						
+fi
 
+else
+#if link do not include Last-Modified
+echo Last-Modified field is missing from output.log
+emails=$(cat ../maintenance | sed '$aend of file')
+printf %s "$emails" | while IFS= read -r onemail
+do {
+python ../send-email.py "$onemail" "To Do List" "Last-Modified field is missing from output.log: 
+$url"
+} done
+echo 
+echo
+fi
+
+else
+#if link do not include Content-Length
+echo Content-Length field is missing from output.log
+emails=$(cat ../maintenance | sed '$aend of file')
+printf %s "$emails" | while IFS= read -r onemail
+do {
+python ../send-email.py "$onemail" "To Do List" "Content-Length field is missing from output.log: 
+$url"
+} done
+echo 
+echo
+fi
+
+else
+#if http statis code is not 200 ok
+echo Did not receive good http status code
+emails=$(cat ../maintenance | sed '$aend of file')
+printf %s "$emails" | while IFS= read -r onemail
+do {
+python ../send-email.py "$onemail" "To Do List" "the following link do not retrieve good http status code: 
+$url"
+} done
+echo 
+echo
 fi
 
 } done
