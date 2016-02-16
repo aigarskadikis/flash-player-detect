@@ -306,15 +306,24 @@ echo Make sure you have created \"$appname\" direcotry inside it!
 echo
 fi
 
-							#lets send emails to all people in "posting" file
-							emails=$(cat ../posting | sed '$aend of file')
-							printf %s "$emails" | while IFS= read -r onemail
-							do {
-								python ../send-email.py "$onemail" "$filename $version" "$realurl
+case "$filename" in
+install_flash_player_ax.exe)
+name=$(echo "Adobe Flash Player (ActiveX)")
+;;
+install_flash_player.exe)
+name=$(echo "Adobe Flash Player")
+;;
+esac
+
+#lets send emails to all people in "posting" file
+emails=$(cat ../posting | sed '$aend of file')
+printf %s "$emails" | while IFS= read -r onemail
+do {
+python ../send-email.py "$onemail" "$name $version" "$realurl 
 $md5
 $sha1"
-							} done
-							echo
+} done
+echo
 else
 #if file already in database
 echo file already in database						
